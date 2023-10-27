@@ -24,7 +24,7 @@ namespace ADS_randomized
 
         static void Main(string[] args)
         {
-            foreach (var variablePrice in new int[] { 500, 375, 250, 100, 75, 50, 25, 10, 0 }.Reverse())
+            foreach (var variablePrice in new int[] { 400, 250, 100, 75, 50, 25, 10, 0 }.Reverse())
             {
                 HOTEL_PRICE_UPPER = variablePrice;
                 // Make folder for future reference
@@ -69,6 +69,7 @@ namespace ADS_randomized
                         return new Day(seats, seatprice, hotelprice);
                     }).ToArray();
 
+                    // Throw away instance if not feasible
                     if (numOfPeople > days.Sum(day => day.Seats))
                     {
                         if (DEBUG)
@@ -97,10 +98,12 @@ namespace ADS_randomized
                     double theoreticalMaxRatio = (double)pmax / (double)pmin;
                     double WCR = 
                         (pmin == 0) ? 
-                        -1 : 
-                        (theoreticalMaxRatio == 1) ? 
-                        0 :
-                        (cCompetitiveRatio - 1) / (theoreticalMaxRatio - 1);
+                            -1 
+                        : 
+                            (theoreticalMaxRatio == 1) ? 
+                                0 
+                            :
+                                (cCompetitiveRatio - 1) / (theoreticalMaxRatio - 1);
                     dataCsv.Add($"{i};{offlinePrice};{onlinePrice};{onlinePrice - offlinePrice};{(theoreticalMaxRatio == double.PositiveInfinity ? "" : theoreticalMaxRatio)};{cCompetitiveRatio};{(WCR == -1 ? "": WCR)}");
 
                     if (WCR != -1) WCRs.Add(WCR);
@@ -109,6 +112,7 @@ namespace ADS_randomized
 
                 File.WriteAllLines(folderPath + "/data.csv", dataCsv);
 
+                // Determine data used for paper graphs
                 double wcrMean = WCRs.Average();
                 double wcrStdDev = WCRs.StandardDeviation();
                 double wcrLowerConf = Math.Max(0, wcrMean - 1.96 * wcrStdDev);
